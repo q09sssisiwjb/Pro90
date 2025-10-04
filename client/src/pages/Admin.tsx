@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Users, Image as ImageIcon, Palette, BarChart3, CheckCircle, XCircle, Clock, Trash2, Ban, UserCheck, Eye, Send } from "lucide-react";
+import { Shield, Users, Image as ImageIcon, Palette, BarChart3, CheckCircle, XCircle, Clock, Trash2, Ban, UserCheck, Eye, Send, Search } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -92,6 +92,8 @@ export default function Admin() {
     title: "",
     content: "",
   });
+  const [userSearch, setUserSearch] = useState("");
+  const [artStyleSearch, setArtStyleSearch] = useState("");
 
   const { data: isAdminData, isLoading: adminCheckLoading } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/admin/check", user?.email],
@@ -113,9 +115,30 @@ export default function Admin() {
     enabled: (selectedTab === "users" || selectedTab === "messages") && isAdminData?.isAdmin === true,
   });
 
+  const filteredProfiles = profiles?.filter((profile) => {
+    if (!userSearch) return true;
+    const searchLower = userSearch.toLowerCase();
+    return (
+      profile.displayName?.toLowerCase().includes(searchLower) ||
+      profile.email?.toLowerCase().includes(searchLower) ||
+      profile.userId.toLowerCase().includes(searchLower) ||
+      profile.location?.toLowerCase().includes(searchLower)
+    );
+  });
+
   const { data: artStyles, isLoading: artStylesLoading } = useQuery<ArtStyle[]>({
     queryKey: ["/api/admin/art-styles"],
     enabled: selectedTab === "art-styles" && isAdminData?.isAdmin === true,
+  });
+
+  const filteredArtStyles = artStyles?.filter((style) => {
+    if (!artStyleSearch) return true;
+    const searchLower = artStyleSearch.toLowerCase();
+    return (
+      style.name.toLowerCase().includes(searchLower) ||
+      style.description?.toLowerCase().includes(searchLower) ||
+      style.keywords?.toLowerCase().includes(searchLower)
+    );
   });
 
   const { data: userStatistics, isLoading: userStatsLoading } = useQuery<UserStatistics>({
@@ -585,9 +608,21 @@ export default function Admin() {
               <CardDescription>View and manage user profiles</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, email, user ID, or location..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-users"
+                  />
+                </div>
+              </div>
               {profilesLoading ? (
                 <Skeleton className="h-96" />
-              ) : profiles && profiles.length > 0 ? (
+              ) : filteredProfiles && filteredProfiles.length > 0 ? (
                 <div className="w-full overflow-x-auto">
                   <Table className="min-w-full">
                     <TableHeader>
@@ -606,7 +641,7 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {profiles.map((profile) => (
+                      {filteredProfiles.map((profile) => (
                         <TableRow key={profile.id} data-testid={`row-user-${profile.id}`}>
                           <TableCell data-testid={`text-display-name-${profile.id}`}>
                             {profile.displayName || "Not set"}
@@ -695,7 +730,7 @@ export default function Admin() {
                 </div>
               ) : (
                 <div className="text-center py-12 text-muted-foreground" data-testid="text-no-users">
-                  No user profiles found
+                  {userSearch ? "No users match your search" : "No user profiles found"}
                 </div>
               )}
             </CardContent>
@@ -709,12 +744,24 @@ export default function Admin() {
               <CardDescription>Browse and manage user-created art styles</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, description, or keywords..."
+                    value={artStyleSearch}
+                    onChange={(e) => setArtStyleSearch(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-art-styles"
+                  />
+                </div>
+              </div>
               {artStylesLoading ? (
                 <Skeleton className="h-96" />
-              ) : artStyles && artStyles.length > 0 ? (
+              ) : filteredArtStyles && filteredArtStyles.length > 0 ? (
                 <ScrollArea className="h-[600px]">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {artStyles.map((style) => (
+                    {filteredArtStyles!.map((style) => (
                       <Card key={style.id} data-testid={`card-art-style-${style.id}`}>
                         <CardHeader>
                           <div className="flex items-start justify-between">
@@ -757,7 +804,7 @@ export default function Admin() {
                 </ScrollArea>
               ) : (
                 <div className="text-center py-12 text-muted-foreground" data-testid="text-no-art-styles">
-                  No art styles found
+                  {artStyleSearch ? "No art styles match your search" : "No art styles found"}
                 </div>
               )}
             </CardContent>
