@@ -38,8 +38,8 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { logOut } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { User as FirebaseUser } from "firebase/auth";
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useUserMessages } from "@/hooks/useUserMessages";
 
 const navigation = [
   {
@@ -185,46 +185,13 @@ interface AppSidebarProps {
 
 export function AppSidebar({ user }: AppSidebarProps) {
   const { toast } = useToast();
-  const [unreadCount, setUnreadCount] = useState(0);
   
   const { data: isAdminData } = useQuery<{ isAdmin: boolean }>({
     queryKey: ["/api/admin/check", user?.email],
     enabled: !!user?.email,
   });
 
-  // Check for unread messages
-  useEffect(() => {
-    const checkUnreadMessages = () => {
-      const savedMessages = localStorage.getItem('userMessages');
-      if (savedMessages) {
-        const messages = JSON.parse(savedMessages);
-        const unread = messages.filter((msg: any) => !msg.isRead).length;
-        setUnreadCount(unread);
-      } else {
-        setUnreadCount(0);
-      }
-    };
-
-    // Initial check
-    checkUnreadMessages();
-
-    // Listen for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'userMessages') {
-        checkUnreadMessages();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check periodically in case of changes in the same tab
-    const interval = setInterval(checkUnreadMessages, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+  const { unreadCount } = useUserMessages();
 
   const handleLogout = async () => {
     try {
