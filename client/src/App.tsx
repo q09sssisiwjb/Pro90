@@ -53,32 +53,32 @@ function TopBar() {
   const { user, loading } = useAuth();
 
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger data-testid="button-sidebar-toggle" />
+    <header className="flex items-center justify-between px-2 py-3 md:px-4 md:py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-shrink">
+        <SidebarTrigger data-testid="button-sidebar-toggle" className="flex-shrink-0" />
         <div className="hidden md:flex items-center space-x-6">
-          <a href="#tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-tools">
+          <a href="#tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap" data-testid="nav-tools">
             Tools
           </a>
-          <Link href="/guides" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-guides">
+          <Link href="/guides" className="text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap" data-testid="nav-guides">
             Guides
           </Link>
-          <a href="#gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="nav-gallery">
+          <a href="#gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap" data-testid="nav-gallery">
             Gallery
           </a>
         </div>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
         {!loading && (
           user ? (
             <UserAvatar user={user} className="h-8 w-8" />
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" data-testid="button-login">
+              <Button asChild variant="ghost" size="sm" className="text-xs md:text-sm px-2 md:px-4" data-testid="button-login">
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild size="sm" className="bg-[#8a3dff] hover:bg-[#7c36e6] text-white" data-testid="button-signup">
+              <Button asChild size="sm" className="bg-[#8a3dff] hover:bg-[#7c36e6] text-white text-xs md:text-sm px-2 md:px-4" data-testid="button-signup">
                 <Link href="/signup">Sign Up</Link>
               </Button>
             </>
